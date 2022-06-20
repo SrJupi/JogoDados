@@ -1,15 +1,15 @@
 package cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.controller;
 
-import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.domain.GamesEntity;
+import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.domain.GameEntity;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.domain.PlayerEntity;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.GamesRepository;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.PlayerRepository;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.service.AppService;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -27,13 +27,28 @@ public class AppController {
     private AppService appService;
 
     @GetMapping("/players")
-    public ResponseEntity<?> getPlayers (){
+    public ResponseEntity<?> getPlayerGames(){
         return appService.getPlayers();
+    }
+
+    @GetMapping("/players/{id}/games")
+    public ResponseEntity<?> getPlayerGames(@PathVariable Integer id){
+        return appService.getPlayerGames(id);
+    }
+
+    @GetMapping("/players/ranking")
+    public ResponseEntity<?> getAvgRanking(){
+        return appService.getAvgRanking();
+    }
+
+    @GetMapping("/players/ranking/loser")
+    public ResponseEntity<?> getLoserRanking(){
+        return appService.getLoserRanking();
     }
 
     @GetMapping("/games")
     public ResponseEntity<?> getGames (){
-        List<GamesEntity> gamesEntityList = gamesRepository.findAll();
+        List<GameEntity> gamesEntityList = gamesRepository.findAll();
         return new ResponseEntity<>(gamesEntityList, HttpStatus.OK);
     }
 
@@ -43,15 +58,15 @@ public class AppController {
         playerRepository.save(player1);
         PlayerEntity player2 = new PlayerEntity("Test2");
         playerRepository.save(player2);
-        GamesEntity game = new GamesEntity(player1);
+        GameEntity game = new GameEntity(player1);
         gamesRepository.save(game);
-        game = new GamesEntity(player1);
+        game = new GameEntity(player1);
         gamesRepository.save(game);
-        game = new GamesEntity(player2);
+        game = new GameEntity(player2);
         gamesRepository.save(game);
-        game = new GamesEntity(player2);
+        game = new GameEntity(player2);
         gamesRepository.save(game);
-        game = new GamesEntity(player2);
+        game = new GameEntity(player2);
         gamesRepository.save(game);
     }
 }

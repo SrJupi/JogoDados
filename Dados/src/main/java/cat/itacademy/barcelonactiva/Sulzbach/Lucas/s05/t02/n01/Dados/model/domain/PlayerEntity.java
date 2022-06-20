@@ -1,7 +1,6 @@
 package cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,7 +25,7 @@ public class PlayerEntity {
 
     @JsonManagedReference
     @OneToMany(mappedBy="player")
-    Set <GamesEntity> gamesPlayed = new HashSet<>();
+    Set <GameEntity> gamesPlayed = new HashSet<>();
 
     public PlayerEntity() {
     }

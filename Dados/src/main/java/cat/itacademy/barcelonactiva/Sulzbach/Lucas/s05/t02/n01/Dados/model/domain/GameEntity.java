@@ -1,7 +1,6 @@
 package cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +13,7 @@ import java.util.Random;
 @Setter
 @Entity
 @Table(name = "games")
-public class GamesEntity {
+public class GameEntity {
 
     @Id
     @SequenceGenerator(name="games_seq", sequenceName="game_id")
@@ -29,17 +28,15 @@ public class GamesEntity {
     private Timestamp gameTime;
     private Integer diceOne;
     private Integer diceTwo;
-    private Boolean isWin;
 
-    public GamesEntity() {
+    public GameEntity() {
     }
 
-    public GamesEntity(PlayerEntity playerEntity) {
+    public GameEntity(PlayerEntity playerEntity) {
         this.player = playerEntity;
         this.gameTime = setGameTime();
         this.diceOne = rollDice();
         this.diceTwo = rollDice();
-        this.isWin = getDiceOne() + getDiceTwo() == 7;
     }
 
     private Timestamp setGameTime(){

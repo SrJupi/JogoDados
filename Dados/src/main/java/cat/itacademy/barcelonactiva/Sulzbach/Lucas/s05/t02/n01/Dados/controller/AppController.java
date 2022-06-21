@@ -3,6 +3,8 @@ package cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.controller
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.domain.GameEntity;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.domain.PlayerEntity;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.AddPlayerDTO;
+import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.GameDTO;
+import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.PlayerDTO;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.GamesRepository;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.PlayerRepository;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.service.AppService;
@@ -26,13 +28,13 @@ public class AppController {
     private AppService appService;
 
     @GetMapping("/players")
-    public ResponseEntity<?> getPlayerGames(){
-        return appService.getPlayers();
+    public ResponseEntity<List<PlayerDTO>> getPlayerGames(){
+        return ResponseEntity.ok(appService.getPlayers());
     }
 
     @GetMapping("/players/{id}/games")
-    public ResponseEntity<?> getPlayerGames(@PathVariable Integer id){
-        return appService.getPlayerGames(id);
+    public ResponseEntity<List<GameDTO>> getPlayerGames(@PathVariable Integer id){
+        return ResponseEntity.ok(appService.getPlayerGames(id));
     }
 
     @GetMapping("/players/ranking")
@@ -56,8 +58,8 @@ public class AppController {
     }
 
     @PostMapping("/players/{id}/games")
-    public ResponseEntity<?> playGame(@PathVariable Integer id){
-        return appService.playGame(id);
+    public ResponseEntity<GameDTO> playGame(@PathVariable Integer id){
+        return ResponseEntity.ok(appService.playGame(id));
     }
 
 }

@@ -17,7 +17,7 @@ public class GameEntity {
 
     @Id
     @SequenceGenerator(name="games_seq", sequenceName="game_id")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "games_seq")
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "games_seq")
     private Integer gameId;
 
     @JsonBackReference

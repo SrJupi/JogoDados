@@ -9,9 +9,9 @@ public class PlayerDTO {
 
     private Integer userId;
     private String name;
-    private Float percentage;
+    private Double percentage;
 
-    public PlayerDTO(Integer userId, String name, Float percentage) {
+    public PlayerDTO(Integer userId, String name, Double percentage) {
         this.userId = userId;
         this.name = name;
         this.percentage = percentage;

@@ -18,7 +18,7 @@ public class PlayerEntity {
 
     @Id
     @SequenceGenerator(name="players_seq", sequenceName="player_id")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "player_seq")
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "player_seq")
     private Integer userId;
     private String name;
     private Timestamp registerDate;

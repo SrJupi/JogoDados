@@ -10,11 +10,8 @@ import org.springframework.stereotype.Component;
 public class Mapper {
 
     public PlayerPercentageDTO playerToPercentageDTO (PlayerEntity player){
-        float percentage = (float)player.getGamesPlayed()
-                .stream()
-                .filter(g -> g.getDiceOne() + g.getDiceTwo() == 7)
-                .count() / (float)player.getGamesPlayed().stream().count();
-        return new PlayerPercentageDTO(player.getUserId(), player.getName(), percentage);
+        return new PlayerPercentageDTO(player.getUserId(), player.getName(),
+                (float)player.getGamesWon()/(float)player.getGamesPlayed());
     }
 
     public GameDTO getGamesDTO(GameEntity game) {

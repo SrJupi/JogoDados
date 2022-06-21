@@ -22,10 +22,12 @@ public class PlayerEntity {
     private Integer userId;
     private String name;
     private Timestamp registerDate;
+    private Integer gamesWon;
+    private Integer gamesPlayed;
 
     @JsonManagedReference
     @OneToMany(mappedBy="player")
-    Set <GameEntity> gamesPlayed = new HashSet<>();
+    Set <GameEntity> gamesList = new HashSet<>();
 
     public PlayerEntity() {
     }
@@ -33,6 +35,16 @@ public class PlayerEntity {
     public PlayerEntity(String name) {
         this.name = name;
         this.registerDate = setRegisterDate();
+        this.gamesWon = 0;
+        this.gamesPlayed = 0;
+    }
+
+    public void addGamePlayed (){
+        this.gamesPlayed += 1;
+    }
+
+    public void addGameWon (){
+        this.gamesWon += 1;
     }
 
     private Timestamp setRegisterDate (){

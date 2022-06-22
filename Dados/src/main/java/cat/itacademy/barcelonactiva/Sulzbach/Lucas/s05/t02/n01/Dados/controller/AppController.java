@@ -1,18 +1,16 @@
 package cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.controller;
 
-import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.domain.GameEntity;
-import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.domain.PlayerEntity;
-import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.AddPlayerDTO;
+
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.GameDTO;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.PlayerDTO;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.GamesRepository;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.PlayerRepository;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.service.AppService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -43,23 +41,31 @@ public class AppController {
     }
 
     @GetMapping("/players/ranking/loser")
-    public ResponseEntity<?> getLoserRanking(){
-        return appService.getLoserRanking();
+    public ResponseEntity<PlayerDTO> getLoserRanking(){
+        return ResponseEntity.ok(appService.getLoserRanking());
     }
 
     @GetMapping("/players/ranking/winner")
-    public ResponseEntity<?> getWinnerRanking(){
-        return appService.getWinnerRanking();
+    public ResponseEntity<PlayerDTO> getWinnerRanking(){
+        return ResponseEntity.ok(appService.getWinnerRanking());
     }
 
     @PostMapping("/players")
-    public ResponseEntity<?> addPlayer(@RequestBody AddPlayerDTO addPlayerDTO){
-        return appService.addPlayer(addPlayerDTO);
+    public ResponseEntity <PlayerDTO> addPlayer(@RequestBody PlayerDTO addPlayerDTO){
+        PlayerDTO responseDTO = appService.addPlayer(addPlayerDTO);
+        return ResponseEntity
+                .created(URI.create(String.format("/players/%d", responseDTO.getUserId())))
+                .body(responseDTO);
     }
 
     @PostMapping("/players/{id}/games")
     public ResponseEntity<GameDTO> playGame(@PathVariable Integer id){
         return ResponseEntity.ok(appService.playGame(id));
+    }
+
+    @PutMapping("/players")
+    public ResponseEntity <PlayerDTO> updatePlayer(@RequestBody PlayerDTO playerDTO){
+        return appService.updatePlayer(playerDTO);
     }
 
 }

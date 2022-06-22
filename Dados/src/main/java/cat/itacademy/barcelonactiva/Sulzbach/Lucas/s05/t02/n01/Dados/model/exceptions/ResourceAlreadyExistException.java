@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Getter
 @Setter
-@ResponseStatus(value = HttpStatus.NOT_FOUND)
-public class ResourceNotFoundException extends RuntimeException{
+@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+public class ResourceAlreadyExistException extends RuntimeException{
 
     @Getter(value = AccessLevel.NONE)
     @Setter(value = AccessLevel.NONE)
@@ -19,15 +19,11 @@ public class ResourceNotFoundException extends RuntimeException{
     private String searchedField;
     private String idUsed;
 
-    public ResourceNotFoundException(String searchedResource, String searchedField, String idUsed) {
-        super(String.format("%s not found with %s : '%s'", searchedResource, searchedField, idUsed));
+    public ResourceAlreadyExistException(String searchedResource, String searchedField, String idUsed) {
+        super(String.format("%s with %s '%s' already exist", searchedResource, searchedField, idUsed));
         this.searchedResource = searchedResource;
         this.searchedField = searchedField;
         this.idUsed = idUsed;
-    }
-
-    public ResourceNotFoundException() {
-        super(String.format("Request not found"));
     }
 
 }

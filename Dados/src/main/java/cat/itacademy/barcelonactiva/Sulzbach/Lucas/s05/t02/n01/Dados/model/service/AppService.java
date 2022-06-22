@@ -2,9 +2,9 @@ package cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.serv
 
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.domain.GameEntity;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.domain.PlayerEntity;
-import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.AddPlayerDTO;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.GameDTO;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.PlayerDTO;
+import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.exceptions.ResourceAlreadyExistException;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.exceptions.ResourceNotFoundException;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.GamesRepository;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.PlayerRepository;
@@ -14,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,34 +41,50 @@ public class AppService {
     @Deprecated
     public ResponseEntity<?> getAvgRanking() {
         List<PlayerEntity> playerEntityList = playerRepository.findAll();
-        float games = (float) playerEntityList.stream().map(p -> p.getGamesList().size()).count();
-        float wins = (float) playerEntityList.stream().map(p -> p.getGamesList().stream()
-                .filter(g -> g.getDiceOne() + g.getDiceTwo() == 7).count()).count();
+        float games = (float) playerEntityList
+                .stream()
+                .map(p -> p
+                        .getGamesList()
+                        .size())
+                .count();
+        float wins = (float) playerEntityList
+                .stream()
+                .map(p -> p.getGamesList()
+                .stream()
+                .filter(g -> g.getDiceOne() + g.getDiceTwo() == 7)
+                        .count())
+                .count();
         return new ResponseEntity<>(wins/games, HttpStatus.OK);
     }
-    @Deprecated
-    public ResponseEntity<?> getLoserRanking() {
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+    public PlayerDTO getLoserRanking() {
+        List<PlayerEntity> playerList = playerRepository.findAll();
+        PlayerDTO lowestPlayer = playerList
+                .stream()
+                .map(player -> mapToDTO(player))
+                .min(Comparator.comparing(PlayerDTO::getPercentage))
+                .orElseThrow(() -> new ResourceNotFoundException());
+        return lowestPlayer;
     }
-    @Deprecated
-    public ResponseEntity<?> getWinnerRanking() {
-        List <PlayerEntity> playerEntityList = playerRepository.findAll();
-        if (playerEntityList.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(HttpStatus.OK);
+
+    public PlayerDTO getWinnerRanking() {
+        List<PlayerEntity> playerList = playerRepository.findAll();
+        PlayerDTO highestPlayer = playerList
+                .stream()
+                .map(player -> mapToDTO(player))
+                .max(Comparator.comparing(PlayerDTO::getPercentage))
+                .orElseThrow(() -> new ResourceNotFoundException());
+        return highestPlayer;
     }
-    @Deprecated
-    public ResponseEntity<?> addPlayer(AddPlayerDTO addPlayerDTO) {
-        if (addPlayerDTO.getName().equals("Unknown")){
-            if (playerRepository.existsByName(addPlayerDTO.getName())){
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
+
+    public PlayerDTO addPlayer(PlayerDTO addPlayerDTO) {
+        if (addPlayerDTO.getName() == null) {
+            addPlayerDTO.setName("Unknown");
+        } else if (playerRepository.existsByName(addPlayerDTO.getName())){
+            throw new ResourceAlreadyExistException("player", "name", addPlayerDTO.getName());
         }
-        PlayerEntity savedPlayer = playerRepository.save(new PlayerEntity(addPlayerDTO.getName()));
-        return ResponseEntity
-                .created(URI.create(String.format("/players/%d", savedPlayer.getUserId())))
-                .build();
+        PlayerEntity player = playerRepository.save(mapToEntity(addPlayerDTO));
+        return mapToDTO(player);
     }
 
     public GameDTO playGame(Integer id) {
@@ -77,7 +95,34 @@ public class AppService {
         return mapToDTO(game);
     }
 
+
+
+    public ResponseEntity<PlayerDTO> updatePlayer(PlayerDTO playerDTO) {
+        //Check if update name exist in database,
+        //if so throw error
+        if (playerRepository.existsByName(playerDTO.getName())){
+            throw new ResourceAlreadyExistException("player", "name", playerDTO.getName());
+        }
+
+        //find player by id
+        //if not exist create new player it with addPlayer function
+        //if exist update player
+        Optional <PlayerEntity> optPlayer = playerRepository.findById(playerDTO.getUserId());
+        if (optPlayer.isEmpty()){
+            PlayerDTO responseDTO = addPlayer(playerDTO);
+            return ResponseEntity
+                    .created(URI.create(String.format("/players/%d", responseDTO.getUserId())))
+                    .body(responseDTO);
+        }else{
+            PlayerEntity player = optPlayer.get();
+            player.setName(playerDTO.getName());
+            player = playerRepository.save(player);
+            return ResponseEntity.ok(mapToDTO(player));
+        }
+    }
+
     // VVV new map functions VVV
+
     private PlayerDTO mapToDTO(PlayerEntity player) {
         double percentage = player.getGamesList()
                 .stream()
@@ -89,5 +134,9 @@ public class AppService {
 
     private GameDTO mapToDTO(GameEntity game) {
         return new GameDTO(game.getGameId(), game.getDiceOne(), game.getDiceTwo());
+    }
+
+    private PlayerEntity mapToEntity(PlayerDTO addPlayerDTO) {
+        return new PlayerEntity(addPlayerDTO.getName());
     }
 }

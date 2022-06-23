@@ -11,29 +11,13 @@ import java.util.Random;
 
 @Getter
 @Setter
-@Entity
-@Table(name = "games")
-public class GameEntity {
-
-    @Id
-    @SequenceGenerator(name="games_seq", sequenceName="game_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "games_seq")
-    private Integer gameId;
-
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name ="FK_UserId", nullable = false)
-    private PlayerEntity player;
+public class GameMongoEntity {
 
     private Timestamp gameTime;
     private Integer diceOne;
     private Integer diceTwo;
 
-    public GameEntity() {
-    }
-
-    public GameEntity(PlayerEntity playerEntity) {
-        this.player = playerEntity;
+    public GameMongoEntity() {
         this.gameTime = setGameTime();
         this.diceOne = rollDice();
         this.diceTwo = rollDice();

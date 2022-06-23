@@ -27,7 +27,7 @@ public class AppController {
     }
 
     @GetMapping("/players/{id}/games")
-    public ResponseEntity<List<GameDTO>> getPlayerGames(@PathVariable Integer id){
+    public ResponseEntity<PlayerDTO> getPlayerGames(@PathVariable Integer id){
         return ResponseEntity.ok(appService.getPlayerGames(id));
     }
 

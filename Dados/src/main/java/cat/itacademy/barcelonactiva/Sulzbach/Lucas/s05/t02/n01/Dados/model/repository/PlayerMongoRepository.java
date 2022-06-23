@@ -16,5 +16,5 @@ public interface PlayerMongoRepository extends MongoRepository<PlayerMongoEntity
 
     Optional<PlayerMongoEntity> findByUserId(Integer id);
 
-    Optional<PlayerMongoEntity> findTopByOrderByUserIdAsc();
+    Optional<PlayerMongoEntity> findTopByOrderByUserIdDesc();
 }

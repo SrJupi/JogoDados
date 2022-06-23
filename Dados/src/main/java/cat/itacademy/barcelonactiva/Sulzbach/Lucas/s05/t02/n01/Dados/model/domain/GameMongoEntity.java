@@ -13,7 +13,7 @@ import java.util.Random;
 @Setter
 public class GameMongoEntity {
 
-    private Timestamp gameTime;
+    private String gameTime;
     private Integer diceOne;
     private Integer diceTwo;
 
@@ -23,8 +23,8 @@ public class GameMongoEntity {
         this.diceTwo = rollDice();
     }
 
-    private Timestamp setGameTime(){
-        return new Timestamp(new Date().getTime());
+    private String setGameTime(){
+        return new Timestamp(new Date().getTime()).toString();
     }
 
     private Integer rollDice(){

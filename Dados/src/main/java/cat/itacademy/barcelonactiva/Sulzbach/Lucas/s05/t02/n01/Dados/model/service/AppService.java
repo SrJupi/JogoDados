@@ -28,11 +28,11 @@ public class AppService {
         return playerRepository.findAll().stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
-    public List<GameDTO> getPlayerGames(Integer id) {
+    public PlayerDTO getPlayerGames(Integer id) {
         PlayerMongoEntity player = playerRepository
                 .findByUserId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("player", "id", String.valueOf(id)));
-        return player.getGamesList().stream().map(this::mapToDTO).collect(Collectors.toList());
+        return fullMapToDTO(player);
     }
 
     public ResponseEntity<Float> getAvgRanking() {
@@ -77,10 +77,10 @@ public class AppService {
         } else if (playerRepository.existsByName(addPlayerDTO.getName())) {
             throw new ResourceAlreadyExistException("player", "name", addPlayerDTO.getName());
         }
-        Optional <PlayerMongoEntity> optPlayer = playerRepository.findTopByOrderByUserIdAsc();
+        Optional <PlayerMongoEntity> optPlayer = playerRepository.findTopByOrderByUserIdDesc();
         int userId;
         if (optPlayer.isEmpty()){
-            userId = 0;
+            userId = 1;
         }else{
             userId = optPlayer.get().getUserId() + 1;
         }
@@ -94,13 +94,15 @@ public class AppService {
                 .orElseThrow(() -> new ResourceNotFoundException("player", "id", String.valueOf(id)));
         GameMongoEntity game = new GameMongoEntity();
         player.addGamesList(game);
+        playerRepository.save(player);
         return mapToDTO(game);
     }
 
     public ResponseEntity<PlayerDTO> updatePlayer(PlayerDTO playerDTO) {
         //Check if update name exist in database,
         //if so throw error
-        if (playerRepository.existsByName(playerDTO.getName())) {
+        if (playerRepository.existsByName(playerDTO.getName())
+                && !playerDTO.getName().equals("Unknown")){
             throw new ResourceAlreadyExistException("player", "name", playerDTO.getName());
         }
 
@@ -115,7 +117,8 @@ public class AppService {
                     .body(responseDTO);
         } else {
             PlayerMongoEntity player = optPlayer.get();
-            player.setName(playerDTO.getName());
+            String name = player.getName() == null ? "Unknown" : playerDTO.getName();
+            player.setName(name);
             player = playerRepository.save(player);
             return ResponseEntity.ok(mapToDTO(player));
         }
@@ -126,10 +129,11 @@ public class AppService {
                 .findByUserId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("player", "id", String.valueOf(id)));
         player.setGamesList(new ArrayList<>());
+        playerRepository.save(player);
     }
 
-    // VVV new map functions VVV
 
+    // VVV new map functions VVV
     private PlayerDTO mapToDTO(PlayerMongoEntity player) {
 
         Double percentage = player.getGamesList().size() == 0 ? null : player.getGamesList()
@@ -138,6 +142,15 @@ public class AppService {
                 .summaryStatistics().getAverage() * 100;
         return new PlayerDTO(player.getUserId(),
                 player.getName(), percentage);
+    }
+
+    private PlayerDTO fullMapToDTO(PlayerMongoEntity player) {
+        Double percentage = player.getGamesList().size() == 0 ? null : player.getGamesList()
+                .stream()
+                .mapToDouble(g -> g.getDiceOne() + g.getDiceTwo() == 7 ? 1 : 0)
+                .summaryStatistics().getAverage() * 100;
+        return new PlayerDTO(player.getUserId(), player.getName(), percentage,
+                player.getGamesList().stream().map(g -> mapToDTO(g)).collect(Collectors.toList()));
     }
 
     private GameDTO mapToDTO(GameMongoEntity game) {

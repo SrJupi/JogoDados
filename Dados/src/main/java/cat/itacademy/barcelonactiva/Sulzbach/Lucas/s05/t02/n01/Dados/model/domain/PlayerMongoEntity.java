@@ -20,7 +20,7 @@ public class PlayerMongoEntity {
 
     private Integer userId;
     private String name;
-    private Timestamp registerDate;
+    private String registerDate;
     private List<GameMongoEntity> gamesList = new ArrayList<>();
 
     public PlayerMongoEntity() {
@@ -32,8 +32,8 @@ public class PlayerMongoEntity {
         this.registerDate = setRegisterDate();
     }
 
-    private Timestamp setRegisterDate (){
-        return new Timestamp(new Date().getTime());
+    private String setRegisterDate (){
+        return new Timestamp(new Date().getTime()).toString();
     }
 
     public void addGamesList (GameMongoEntity game){

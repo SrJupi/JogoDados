@@ -12,7 +12,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@Document("player")
+@Document("players")
 public class PlayerMongoEntity {
 
     @Id
@@ -26,13 +26,18 @@ public class PlayerMongoEntity {
     public PlayerMongoEntity() {
     }
 
-    public PlayerMongoEntity(String name) {
+    public PlayerMongoEntity(Integer userId, String name) {
+        this.userId = userId;
         this.name = name;
         this.registerDate = setRegisterDate();
     }
 
     private Timestamp setRegisterDate (){
         return new Timestamp(new Date().getTime());
+    }
+
+    public void addGamesList (GameMongoEntity game){
+        gamesList.add(game);
     }
 
 }

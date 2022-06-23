@@ -3,8 +3,7 @@ package cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.controller
 
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.GameDTO;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.PlayerDTO;
-import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.GamesRepository;
-import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.PlayerRepository;
+import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.PlayerMongoRepository;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.service.AppService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +16,13 @@ import java.util.List;
 public class AppController {
 
     @Autowired
-    private GamesRepository gamesRepository;
-
-    @Autowired
-    private PlayerRepository playerRepository;
+    private PlayerMongoRepository playerRepository;
 
     @Autowired
     private AppService appService;
 
     @GetMapping("/players")
-    public ResponseEntity<List<PlayerDTO>> getPlayerGames(){
+    public ResponseEntity<List<PlayerDTO>> getPlayers(){
         return ResponseEntity.ok(appService.getPlayers());
     }
 

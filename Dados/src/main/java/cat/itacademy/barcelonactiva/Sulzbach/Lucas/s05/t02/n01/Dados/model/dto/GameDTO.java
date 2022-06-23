@@ -7,14 +7,11 @@ import lombok.Setter;
 @Setter
 public class GameDTO {
 
-
-    private Integer gameId;
     private Integer diceOne;
     private Integer diceTwo;
     private String result;
 
-    public GameDTO(Integer gameId, Integer diceOne, Integer diceTwo) {
-        this.gameId = gameId;
+    public GameDTO(Integer diceOne, Integer diceTwo) {
         this.diceOne = diceOne;
         this.diceTwo = diceTwo;
         this.result = diceOne + diceTwo == 7 ? "Winner" : "Loser";

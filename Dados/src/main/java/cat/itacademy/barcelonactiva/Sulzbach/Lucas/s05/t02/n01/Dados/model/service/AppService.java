@@ -28,9 +28,9 @@ public class AppService {
     @Autowired
     private GamesRepository gamesRepository;
 
-    public List <PlayerDTO> getPlayers (){
+    public List<PlayerDTO> getPlayers() {
         return playerRepository.findAll().stream().map(this::mapToDTO).collect(Collectors.toList());
-        }
+    }
 
     public List<GameDTO> getPlayerGames(Integer id) {
         PlayerEntity player = playerRepository
@@ -38,49 +38,47 @@ public class AppService {
                 .orElseThrow(() -> new ResourceNotFoundException("player", "id", String.valueOf(id)));
         return player.getGamesList().stream().map(this::mapToDTO).collect(Collectors.toList());
     }
-    @Deprecated
-    public ResponseEntity<?> getAvgRanking() {
+
+    public ResponseEntity<Float> getAvgRanking() {
         List<PlayerEntity> playerEntityList = playerRepository.findAll();
         float games = (float) playerEntityList
                 .stream()
-                .map(p -> p
+                .mapToInt(p -> p
                         .getGamesList()
                         .size())
-                .count();
+                .sum();
         float wins = (float) playerEntityList
                 .stream()
-                .map(p -> p.getGamesList()
-                .stream()
-                .filter(g -> g.getDiceOne() + g.getDiceTwo() == 7)
+                .mapToLong(p -> p.getGamesList()
+                        .stream()
+                        .filter(g -> g.getDiceOne() + g.getDiceTwo() == 7)
                         .count())
-                .count();
-        return new ResponseEntity<>(wins/games, HttpStatus.OK);
+                .sum();
+        return ResponseEntity.ok(wins / games);
     }
 
     public PlayerDTO getLoserRanking() {
         List<PlayerEntity> playerList = playerRepository.findAll();
-        PlayerDTO lowestPlayer = playerList
+        return playerList
                 .stream()
-                .map(player -> mapToDTO(player))
-                .min(Comparator.comparing(PlayerDTO::getPercentage))
-                .orElseThrow(() -> new ResourceNotFoundException());
-        return lowestPlayer;
+                .map(this::mapToDTO)
+                .min(Comparator.comparing(PlayerDTO::getPercentage, Comparator.nullsLast(Comparator.naturalOrder())))
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     public PlayerDTO getWinnerRanking() {
         List<PlayerEntity> playerList = playerRepository.findAll();
-        PlayerDTO highestPlayer = playerList
+        return playerList
                 .stream()
-                .map(player -> mapToDTO(player))
-                .max(Comparator.comparing(PlayerDTO::getPercentage))
-                .orElseThrow(() -> new ResourceNotFoundException());
-        return highestPlayer;
+                .map(this::mapToDTO)
+                .max(Comparator.comparing(PlayerDTO::getPercentage, Comparator.nullsFirst(Comparator.naturalOrder())))
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     public PlayerDTO addPlayer(PlayerDTO addPlayerDTO) {
         if (addPlayerDTO.getName() == null) {
             addPlayerDTO.setName("Unknown");
-        } else if (playerRepository.existsByName(addPlayerDTO.getName())){
+        } else if (playerRepository.existsByName(addPlayerDTO.getName())) {
             throw new ResourceAlreadyExistException("player", "name", addPlayerDTO.getName());
         }
         PlayerEntity player = playerRepository.save(mapToEntity(addPlayerDTO));
@@ -95,25 +93,23 @@ public class AppService {
         return mapToDTO(game);
     }
 
-
-
     public ResponseEntity<PlayerDTO> updatePlayer(PlayerDTO playerDTO) {
         //Check if update name exist in database,
         //if so throw error
-        if (playerRepository.existsByName(playerDTO.getName())){
+        if (playerRepository.existsByName(playerDTO.getName())) {
             throw new ResourceAlreadyExistException("player", "name", playerDTO.getName());
         }
 
         //find player by id
         //if not exist create new player it with addPlayer function
         //if exist update player
-        Optional <PlayerEntity> optPlayer = playerRepository.findById(playerDTO.getUserId());
-        if (optPlayer.isEmpty()){
+        Optional<PlayerEntity> optPlayer = playerRepository.findById(playerDTO.getUserId());
+        if (optPlayer.isEmpty()) {
             PlayerDTO responseDTO = addPlayer(playerDTO);
             return ResponseEntity
                     .created(URI.create(String.format("/players/%d", responseDTO.getUserId())))
                     .body(responseDTO);
-        }else{
+        } else {
             PlayerEntity player = optPlayer.get();
             player.setName(playerDTO.getName());
             player = playerRepository.save(player);
@@ -121,15 +117,25 @@ public class AppService {
         }
     }
 
+    public void deletePlayerGames(Integer id) {
+        PlayerEntity player = playerRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("player", "id", String.valueOf(id)));
+        player.getGamesList()
+                .stream()
+                .forEach(g -> gamesRepository.deleteById(g.getGameId()));
+    }
+
     // VVV new map functions VVV
 
     private PlayerDTO mapToDTO(PlayerEntity player) {
-        double percentage = player.getGamesList()
+
+        Double percentage = player.getGamesList().size() == 0 ? null : player.getGamesList()
                 .stream()
                 .mapToDouble(g -> g.getDiceOne() + g.getDiceTwo() == 7 ? 1 : 0)
-                .summaryStatistics().getAverage();
+                .summaryStatistics().getAverage() * 100;
         return new PlayerDTO(player.getUserId(),
-                player.getName(), percentage * 100);
+                player.getName(), percentage);
     }
 
     private GameDTO mapToDTO(GameEntity game) {

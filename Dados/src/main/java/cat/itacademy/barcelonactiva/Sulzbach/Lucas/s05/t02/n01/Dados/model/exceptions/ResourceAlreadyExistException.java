@@ -6,11 +6,14 @@ import lombok.Setter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.io.Serial;
+
 @Getter
 @Setter
 @ResponseStatus(value = HttpStatus.BAD_REQUEST)
 public class ResourceAlreadyExistException extends RuntimeException{
 
+    @Serial
     @Getter(value = AccessLevel.NONE)
     @Setter(value = AccessLevel.NONE)
     private static final long serialVersionUID = 1L;

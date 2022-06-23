@@ -36,7 +36,7 @@ public class AppController {
     }
 
     @GetMapping("/players/ranking")
-    public ResponseEntity<?> getAvgRanking(){
+    public ResponseEntity<Float> getAvgRanking(){
         return appService.getAvgRanking();
     }
 
@@ -66,6 +66,12 @@ public class AppController {
     @PutMapping("/players")
     public ResponseEntity <PlayerDTO> updatePlayer(@RequestBody PlayerDTO playerDTO){
         return appService.updatePlayer(playerDTO);
+    }
+
+    @DeleteMapping("/players/{id}/games")
+    public ResponseEntity<String> deletePlayerGames(@PathVariable Integer id){
+        appService.deletePlayerGames(id);
+        return ResponseEntity.ok(String.format("Games from player %d were deleted", id));
     }
 
 }

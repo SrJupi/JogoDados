@@ -21,7 +21,7 @@ public class GameEntity {
     private Integer gameId;
 
     @JsonBackReference
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name ="FK_UserId", nullable = false)
     private PlayerEntity player;
 

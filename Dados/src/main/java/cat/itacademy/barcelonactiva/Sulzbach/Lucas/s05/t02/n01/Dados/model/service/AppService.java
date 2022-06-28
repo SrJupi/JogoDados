@@ -32,12 +32,13 @@ public class AppService {
         return playerRepository.findAll().stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
-    public List<GameDTO> getPlayerGames(Integer id) {
+    public PlayerDTO getPlayerGames(Integer id) {
         PlayerEntity player = playerRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("player", "id", String.valueOf(id)));
-        return player.getGamesList().stream().map(this::mapToDTO).collect(Collectors.toList());
+        return fullMapToDTO(player);
     }
+
 
     public ResponseEntity<Float> getAvgRanking() {
         List<PlayerEntity> playerEntityList = playerRepository.findAll();
@@ -137,6 +138,17 @@ public class AppService {
         return new PlayerDTO(player.getUserId(),
                 player.getName(), percentage);
     }
+
+    private PlayerDTO fullMapToDTO(PlayerEntity player) {
+        Double percentage = player.getGamesList().size() == 0 ? null : player.getGamesList()
+                .stream()
+                .mapToDouble(g -> g.getDiceOne() + g.getDiceTwo() == 7 ? 1 : 0)
+                .summaryStatistics().getAverage() * 100;
+        return new PlayerDTO(player.getUserId(),
+                player.getName(), percentage,
+                player.getGamesList().stream().map(g -> mapToDTO(g)).collect(Collectors.toList()));
+    }
+
 
     private GameDTO mapToDTO(GameEntity game) {
         return new GameDTO(game.getGameId(), game.getDiceOne(), game.getDiceTwo());

@@ -20,6 +20,7 @@ public class PlayerEntity {
     @SequenceGenerator(name="players_seq", sequenceName="player_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "player_seq")
     private Integer userId;
+    private String password;
     private String name;
     private Timestamp registerDate;
 

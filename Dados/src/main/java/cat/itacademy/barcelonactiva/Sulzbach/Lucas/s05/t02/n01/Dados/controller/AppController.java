@@ -1,8 +1,10 @@
 package cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.controller;
 
 
+import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.AddPlayerDTO;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.GameDTO;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.PlayerDTO;
+import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.PlayerGamesDTO;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.GamesRepository;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.PlayerRepository;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.service.AppService;
@@ -31,7 +33,7 @@ public class AppController {
     }
 
     @GetMapping("/players/{id}/games")
-    public ResponseEntity<PlayerDTO> getPlayerGames(@PathVariable Integer id){
+    public ResponseEntity<PlayerGamesDTO> getPlayerGames(@PathVariable Integer id){
         return ResponseEntity.ok(appService.getPlayerGames(id));
     }
 
@@ -51,7 +53,7 @@ public class AppController {
     }
 
     @PostMapping("/players")
-    public ResponseEntity <PlayerDTO> addPlayer(@RequestBody PlayerDTO addPlayerDTO){
+    public ResponseEntity <PlayerDTO> addPlayer(@RequestBody AddPlayerDTO addPlayerDTO){
         PlayerDTO responseDTO = appService.addPlayer(addPlayerDTO);
         return ResponseEntity
                 .created(URI.create(String.format("/players/%d", responseDTO.getUserId())))

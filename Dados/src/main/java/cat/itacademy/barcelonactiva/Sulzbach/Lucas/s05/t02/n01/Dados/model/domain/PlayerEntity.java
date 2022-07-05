@@ -31,8 +31,9 @@ public class PlayerEntity {
     public PlayerEntity() {
     }
 
-    public PlayerEntity(String name) {
+    public PlayerEntity(String name, String password) {
         this.name = name;
+        this.password = password;
         this.registerDate = setRegisterDate();
     }
 

@@ -2,8 +2,10 @@ package cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.serv
 
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.domain.GameEntity;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.domain.PlayerEntity;
+import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.AddPlayerDTO;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.GameDTO;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.PlayerDTO;
+import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.PlayerGamesDTO;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.exceptions.ResourceAlreadyExistException;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.exceptions.ResourceNotFoundException;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.GamesRepository;
@@ -11,6 +13,7 @@ import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repos
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -28,11 +31,14 @@ public class AppService {
     @Autowired
     private GamesRepository gamesRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public List<PlayerDTO> getPlayers() {
         return playerRepository.findAll().stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
-    public PlayerDTO getPlayerGames(Integer id) {
+    public PlayerGamesDTO getPlayerGames(Integer id) {
         PlayerEntity player = playerRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("player", "id", String.valueOf(id)));
@@ -76,7 +82,7 @@ public class AppService {
                 .orElseThrow(ResourceNotFoundException::new);
     }
 
-    public PlayerDTO addPlayer(PlayerDTO addPlayerDTO) {
+    public PlayerDTO addPlayer(AddPlayerDTO addPlayerDTO) {
         if (addPlayerDTO.getName() == null) {
             addPlayerDTO.setName("Unknown");
         } else if (playerRepository.existsByName(addPlayerDTO.getName())) {
@@ -100,22 +106,13 @@ public class AppService {
         if (playerRepository.existsByName(playerDTO.getName())) {
             throw new ResourceAlreadyExistException("player", "name", playerDTO.getName());
         }
-
-        //find player by id
-        //if not exist create new player it with addPlayer function
-        //if exist update player
         Optional<PlayerEntity> optPlayer = playerRepository.findById(playerDTO.getUserId());
-        if (optPlayer.isEmpty()) {
-            PlayerDTO responseDTO = addPlayer(playerDTO);
-            return ResponseEntity
-                    .created(URI.create(String.format("/players/%d", responseDTO.getUserId())))
-                    .body(responseDTO);
-        } else {
-            PlayerEntity player = optPlayer.get();
-            player.setName(playerDTO.getName());
-            player = playerRepository.save(player);
-            return ResponseEntity.ok(mapToDTO(player));
-        }
+        if (optPlayer.isEmpty()) return ResponseEntity.badRequest().build();
+        PlayerEntity player = optPlayer.get();
+        player.setName(playerDTO.getName());
+        player = playerRepository.save(player);
+        return ResponseEntity.ok(mapToDTO(player));
+
     }
 
     public void deletePlayerGames(Integer id) {
@@ -139,12 +136,12 @@ public class AppService {
                 player.getName(), percentage);
     }
 
-    private PlayerDTO fullMapToDTO(PlayerEntity player) {
+    private PlayerGamesDTO fullMapToDTO(PlayerEntity player) {
         Double percentage = player.getGamesList().size() == 0 ? null : player.getGamesList()
                 .stream()
                 .mapToDouble(g -> g.getDiceOne() + g.getDiceTwo() == 7 ? 1 : 0)
                 .summaryStatistics().getAverage() * 100;
-        return new PlayerDTO(player.getUserId(),
+        return new PlayerGamesDTO(player.getUserId(),
                 player.getName(), percentage,
                 player.getGamesList().stream().map(g -> mapToDTO(g)).collect(Collectors.toList()));
     }
@@ -154,7 +151,8 @@ public class AppService {
         return new GameDTO(game.getGameId(), game.getDiceOne(), game.getDiceTwo());
     }
 
-    private PlayerEntity mapToEntity(PlayerDTO addPlayerDTO) {
-        return new PlayerEntity(addPlayerDTO.getName());
+    private PlayerEntity mapToEntity(AddPlayerDTO addPlayerDTO) {
+        addPlayerDTO.setPassword(addPlayerDTO.getPassword());
+        return new PlayerEntity(addPlayerDTO.getName(), passwordEncoder.encode(addPlayerDTO.getPassword()));
     }
 }

@@ -10,6 +10,5 @@ public interface PlayerRepository extends JpaRepository <PlayerEntity, Integer> 
 
 
     boolean existsByName(String name);
-
     Optional<PlayerEntity> findByName(String name);
 }

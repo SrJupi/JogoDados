@@ -1,5 +1,6 @@
 package cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.domain;
 
+import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.security.entity.RolesEntity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,6 +28,10 @@ public class PlayerEntity {
     @JsonManagedReference
     @OneToMany(mappedBy="player")
     private Set <GameEntity> gamesList = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(name = "player_roles", joinColumns = @JoinColumn(name = "player_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<RolesEntity> roles = new HashSet<>();
 
     public PlayerEntity() {
     }

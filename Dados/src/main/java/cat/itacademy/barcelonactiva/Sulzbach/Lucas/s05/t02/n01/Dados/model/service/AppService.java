@@ -152,7 +152,6 @@ public class AppService {
     }
 
     private PlayerEntity mapToEntity(AddPlayerDTO addPlayerDTO) {
-        addPlayerDTO.setPassword(addPlayerDTO.getPassword());
         return new PlayerEntity(addPlayerDTO.getName(), passwordEncoder.encode(addPlayerDTO.getPassword()));
     }
 }

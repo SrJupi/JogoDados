@@ -5,18 +5,29 @@ import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.A
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.GameDTO;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.PlayerDTO;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.dto.PlayerGamesDTO;
+import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.exceptions.NotAuthorizedError;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.GamesRepository;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.repository.PlayerRepository;
 import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.model.service.AppService;
+import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.security.jwt.JwtProvider;
+import cat.itacademy.barcelonactiva.Sulzbach.Lucas.s05.t02.n01.Dados.security.jwt.JwtTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.List;
 
 @RestController
 public class AppController {
+
+    @Autowired
+    JwtTokenFilter jwtTokenFilter;
+
+    @Autowired
+    JwtProvider jwtProvider;
 
     @Autowired
     private GamesRepository gamesRepository;
@@ -33,7 +44,9 @@ public class AppController {
     }
 
     @GetMapping("/players/{id}/games")
-    public ResponseEntity<PlayerGamesDTO> getPlayerGames(@PathVariable Integer id){
+    public ResponseEntity<PlayerGamesDTO> getPlayerGames(@PathVariable Integer id, HttpServletRequest request){
+        String header = jwtTokenFilter.getToken(request);
+        if (id != Integer.parseInt(jwtProvider.getIdFromToken(header))) throw new NotAuthorizedError();
         return ResponseEntity.ok(appService.getPlayerGames(id));
     }
 
@@ -61,17 +74,23 @@ public class AppController {
     }
 
     @PostMapping("/players/{id}/games")
-    public ResponseEntity<GameDTO> playGame(@PathVariable Integer id){
+    public ResponseEntity<GameDTO> playGame(@PathVariable Integer id, HttpServletRequest request){
+        String header = jwtTokenFilter.getToken(request);
+        if (id != Integer.parseInt(jwtProvider.getIdFromToken(header))) throw new NotAuthorizedError();
         return ResponseEntity.ok(appService.playGame(id));
     }
 
     @PutMapping("/players")
-    public ResponseEntity <PlayerDTO> updatePlayer(@RequestBody PlayerDTO playerDTO){
+    public ResponseEntity <PlayerDTO> updatePlayer(@RequestBody PlayerDTO playerDTO, HttpServletRequest request){
+        String header = jwtTokenFilter.getToken(request);
+        if (playerDTO.getUserId() != Integer.parseInt(jwtProvider.getIdFromToken(header))) throw new NotAuthorizedError();
         return appService.updatePlayer(playerDTO);
     }
 
     @DeleteMapping("/players/{id}/games")
-    public ResponseEntity<String> deletePlayerGames(@PathVariable Integer id){
+    public ResponseEntity<String> deletePlayerGames(@PathVariable Integer id, HttpServletRequest request){
+        String header = jwtTokenFilter.getToken(request);
+        if (id != Integer.parseInt(jwtProvider.getIdFromToken(header))) throw new NotAuthorizedError();
         appService.deletePlayerGames(id);
         return ResponseEntity.ok(String.format("Games from player %d were deleted", id));
     }

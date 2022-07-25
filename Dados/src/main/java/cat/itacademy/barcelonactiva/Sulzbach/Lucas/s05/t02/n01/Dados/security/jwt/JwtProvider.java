@@ -18,18 +18,19 @@ public class JwtProvider {
     private int expiration;
 
     public String generateToken(Authentication authentication){
-        PlayerPrincipal playerPrincipal = (PlayerPrincipal) authentication.getPrincipal();
-        return Jwts.builder().setSubject(String.valueOf(playerPrincipal.getUserId()))
+        PlayerPrincipal usuarioPrincipal = (PlayerPrincipal) authentication.getPrincipal();
+        return Jwts.builder().setSubject(String.valueOf(usuarioPrincipal.getUserId()))
+                .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + expiration * 1000))
-                .signWith(SignatureAlgorithm.ES512, secret)
+                .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
     }
 
-    public Integer getIdFromToken(String token){
-         return Integer.valueOf(Jwts.parser().setSigningKey(secret)
+    public String getIdFromToken(String token){
+         return Jwts.parser().setSigningKey(secret)
                  .parseClaimsJws(token)
                  .getBody()
-                 .getSubject());
+                 .getSubject();
     }
 
     public boolean validateToken(String token){

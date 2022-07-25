@@ -5,7 +5,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +26,8 @@ public class PlayerPrincipal implements UserDetails {
     }
 
     public static PlayerPrincipal build (PlayerEntity player){
-        List<GrantedAuthority> authorityList = player.getRoles().stream().map(r -> new SimpleGrantedAuthority(r.getRoleName())).collect(Collectors.toList());
+        List<GrantedAuthority> authorityList = new ArrayList<>();
+        authorityList.add(new SimpleGrantedAuthority(player.getRole()));
         return new PlayerPrincipal(player.getUserId(), player.getPassword(), player.getName(), authorityList);
     }
 

@@ -10,7 +10,7 @@ import java.io.Serial;
 
 @Getter
 @Setter
-@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+@ResponseStatus(value = HttpStatus.FORBIDDEN)
 public class NotAuthorizedError extends RuntimeException{
 
     @Serial

@@ -30,7 +30,7 @@ public class ResourceNotFoundException extends RuntimeException{
     }
 
     public ResourceNotFoundException() {
-        super("Request not found");
+        super("Resource not found");
     }
 
 }

@@ -31,8 +31,7 @@ public class AppService {
     @Autowired
     private GamesRepository gamesRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+
 
     public List<PlayerDTO> getPlayers() {
         return playerRepository.findAll().stream().map(this::mapToDTO).collect(Collectors.toList());
@@ -152,6 +151,6 @@ public class AppService {
     }
 
     private PlayerEntity mapToEntity(AddPlayerDTO addPlayerDTO) {
-        return new PlayerEntity(addPlayerDTO.getName(), passwordEncoder.encode(addPlayerDTO.getPassword()));
+        return new PlayerEntity(addPlayerDTO.getName(), addPlayerDTO.getPassword());
     }
 }
